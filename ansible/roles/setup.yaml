@@ -1,0 +1,122 @@
+- hosts: cluster
+  become: yes
+  become_user: root
+  remote_user: vagrant
+
+  tasks:
+    - name: Создание директории для ssh-ключей у пользователя root
+      file: state=directory mode=0700 dest=/root/.ssh/
+
+    - name: Копирование rsa-ключа в окружение пользователя root
+      copy: src=~/.ssh/id_rsa.pub dest=/root/.ssh/authorized_keys owner=root mode=0600
+      register: rsa
+      ignore_errors: yes
+
+    - name: Копирование dsa-ключа в окружение пользователя root
+      copy: src=~/.ssh/id_dsa.pub dest=/root/.ssh/authorized_keys owner=root mode=0600
+      when: rsa|failed
+
+    - name: Проверка работы DNS
+      command: host -t A google.com
+      register: ns
+      ignore_errors: yes
+
+    - name: Копирование новой конфигурации DNS, если проверка потерпела неудачу
+      lineinfile: regexp="^nameserver " line="nameserver 8.8.8.8" dest=/etc/resolv.conf
+      when: ns|failed
+
+    - name: Проверка работы DNS, если применяли новые настройки
+      command: host -t A google.com
+      when: ns|failed
+
+    - name: Установка служебных утилит
+      apt: >
+        package={{ item }}
+        state=present
+        update_cache=yes
+      with_items:
+        - htop
+        - mc
+        - vim
+        - git
+        - nano
+        - curl
+
+    - name: Установка apt-transport-https
+      apt: name=apt-transport-https state=latest
+
+    - name: Установка ca-certificates
+      apt: name=ca-certificates state=latest
+
+    - name: Проверка наличия пакета python-apt
+      command: dpkg -s python-apt
+      register: pythonapt
+      when: "ansible_os_family == 'Debian'"
+      ignore_errors: yes
+
+    - name: Установка python-apt, если его нет в системе
+      shell: apt-get update && apt-get -y install python-apt
+      when: "ansible_os_family == 'Debian' and pythonapt.stderr"
+
+    - name: Установка pip
+      apt: name=python-pip state=latest
+
+    - name: Установка pip3
+      apt: name=python3-pip state=latest
+
+    - name: Установка docker-py
+      command: pip install docker-py
+      ignore_errors: yes
+
+    - name: Установка зависимостей
+      apt: >
+        name={{ item }}
+        state=latest
+        update_cache=yes
+      with_items:
+        - libpq-dev
+        - python-psycopg2
+      tags:
+        - packages
+
+    - name: Добавление ключей docker репозитория
+      apt_key: >
+        id=58118E89F3A912897C070ADBF76221572C52609D
+        keyserver=hkp://p80.pool.sks-keyservers.net:80
+        state=present
+
+    - name: Добавление docker репозитория
+      apt_repository: >
+        repo="deb https://apt.dockerproject.org/repo debian-jessie main"
+        state=present
+        update_cache=yes
+
+    - name: Установка docker
+      apt: >
+        pkg={{item}}
+        state=present
+      with_items:
+        - docker-engine
+
+    - name: Настройка docker
+      copy: content='DOCKER_OPTS=""'
+        dest=/etc/default/docker
+      notify: Перезапуск docker
+
+    - name: Добавление текущего пользователя в группу docker
+      user: name=vagrant append=yes groups=docker
+
+    - name: Установка docker-compose
+      get_url:
+        url: https://github.com/docker/compose/releases/download/1.17.0/docker-compose-Linux-x86_64
+        dest: /usr/local/bin/docker-compose
+        mode: 0755
+
+    - name: Даём права на исполнение docker-compose
+      file: dest=/usr/local/bin/docker-compose mode=a+x
+
+  handlers:
+      - name: Перезапуск docker
+        service:
+          name: docker
+          state: restarted

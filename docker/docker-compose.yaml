@@ -1,0 +1,58 @@
+version: '3.2'
+services:
+  zookeeper_1:
+    image: zookeeper:3.4.11
+    hostname: zookeeper_1
+    ports:
+      - "2185:2181"
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      ZOO_MY_ID: 1
+      ZOO_SERVERS: server.1=zookeeper_1:2888:3888 server.2=zookeeper_2:2888:3888 server.3=zookeeper_3:2888:3888
+
+  zookeeper_2:
+    image: zookeeper:3.4.11
+    hostname: zookeeper_2
+    ports:
+      - "2186:2181"
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      ZOO_MY_ID: 2
+      ZOO_SERVERS: server.1=zookeeper_1:2888:3888 server.2=zookeeper_2:2888:3888 server.3=zookeeper_3:2888:3888
+
+  zookeeper_3:
+    image: zookeeper:3.4.11
+    hostname: zookeeper_3
+    ports:
+      - "2187:2181"
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      ZOO_MY_ID: 3
+      ZOO_SERVERS: server.1=zookeeper_1:2888:3888 server.2=zookeeper_2:2888:3888 server.3=zookeeper_3:2888:3888
+
+  kafka:
+    image: wurstmeister/kafka:latest
+    ports:
+      - target: 9094
+        published: 9094
+        protocol: tcp
+        mode: host
+    deploy:
+      # Режим global нужен в случае если у нас больше одного физического сервера и мы хотим распределить контейнеры по всем доступным Swarm-нодам.
+      mode: global
+    environment:
+      HOSTNAME_COMMAND: "docker info | grep ^Name: | cut -d' ' -f 2"
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper_1:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_ADVERTISED_PROTOCOL_NAME: OUTSIDE
+      KAFKA_ADVERTISED_PORT: 9094
+      KAFKA_PROTOCOL_NAME: INSIDE
+      KAFKA_PORT: 9092
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
