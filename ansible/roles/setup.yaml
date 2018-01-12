@@ -1,4 +1,5 @@
-- hosts: cluster
+---
+- hosts: nodes
   become: yes
   become_user: root
   remote_user: vagrant
