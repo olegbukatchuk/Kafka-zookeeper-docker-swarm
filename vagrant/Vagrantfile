@@ -71,7 +71,6 @@ Vagrant.configure(2) do |config|
   servers.each do |machine|
     config.vm.define machine[:hostname] do |node|
       node.vm.box = "debian/stretch64"
-      node.vm.usable_port_range = (20011..30011)
       node.vm.hostname = machine[:hostname]
       node.vm.network "private_network", ip: machine[:ip]
       node.vm.network :forwarded_port, guest: machine[:ssh_vm], host: machine[:ssh_host]
