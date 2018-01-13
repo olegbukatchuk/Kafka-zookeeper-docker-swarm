@@ -1,10 +1,10 @@
 [nodes]
-server1.local ansible_host=127.0.0.1 ansible_port=2211 ansible_user=vagrant
-server2.local ansible_host=127.0.0.1 ansible_port=2212 ansible_user=vagrant
-server3.local ansible_host=127.0.0.1 ansible_port=2213 ansible_user=vagrant
-server4.local ansible_host=127.0.0.1 ansible_port=2214 ansible_user=vagrant
-server5.local ansible_host=127.0.0.1 ansible_port=2215 ansible_user=vagrant
-server6.local ansible_host=127.0.0.1 ansible_port=2216 ansible_user=vagrant
+server1.local ansible_host=127.0.0.1 ansible_port=20011 ansible_user=vagrant
+server2.local ansible_host=127.0.0.1 ansible_port=20012 ansible_user=vagrant
+server3.local ansible_host=127.0.0.1 ansible_port=20013 ansible_user=vagrant
+server4.local ansible_host=127.0.0.1 ansible_port=20014 ansible_user=vagrant
+server5.local ansible_host=127.0.0.1 ansible_port=20015 ansible_user=vagrant
+server6.local ansible_host=127.0.0.1 ansible_port=20016 ansible_user=vagrant
 
 [manager]
 server1.local
