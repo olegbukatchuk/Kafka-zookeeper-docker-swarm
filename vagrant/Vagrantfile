@@ -91,7 +91,6 @@ Vagrant.configure(2) do |config|
           echo #{ssh_pub_key} >> /home/vagrant/.ssh/authorized_keys
           SHELL
       end
-
       (1..6).each do |i|
         node.vm.provision "ansible" do |setup|
           setup.inventory_path = "../ansible/hosts"
@@ -116,6 +115,7 @@ Vagrant.configure(2) do |config|
             swarm.raw_arguments = [
               "-M ../ansible/library"
             ]
+          end
         end
       end
     end
