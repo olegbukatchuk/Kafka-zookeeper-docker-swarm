@@ -67,56 +67,47 @@ servers = [
 ]
 
 Vagrant.configure(2) do |config|
-  (1..6).each do |i|
-    config.vm.synced_folder ".", "/vagrant", disabled: true
-    servers.each do |machine|
-      config.vm.define machine[:hostname] do |node|
-        node.vm.box = "debian/stretch64"
-        node.vm.hostname = machine[:hostname]
-        node.vm.network "private_network", ip: machine[:ip]
-        node.vm.network :forwarded_port, guest: machine[:ssh_vm], host: machine[:ssh_host]
-        node.vm.provider "virtualbox" do |vb|
-          vb.customize ["modifyvm", :id, "--memory", machine[:ram]]
-          vb.customize ["modifyvm", :id, "--cpus", machine[:core]]
-          vb.name = machine[:hostname]
-          if (!machine[:hdd_name].nil?)
-            unless File.exist?(machine[:hdd_name])
-                vb.customize ["createhd", "--filename", machine[:hdd_name], "--size", machine[:hdd_size]]
-            end
-            vb.customize ["storageattach", :id, "--storagectl", "SATA Controller", "--port", 1, "--device", 0, "--type", "hdd", "--medium", machine[:hdd_name]]
+  config.vm.synced_folder ".", "/vagrant", disabled: true
+  servers.each do |machine|
+    config.vm.define machine[:hostname] do |node|
+      node.vm.box = "debian/stretch64"
+      node.vm.hostname = machine[:hostname]
+      node.vm.network "private_network", ip: machine[:ip]
+      node.vm.network :forwarded_port, guest: machine[:ssh_vm], host: machine[:ssh_host]
+      node.vm.provider "virtualbox" do |vb|
+        vb.customize ["modifyvm", :id, "--memory", machine[:ram]]
+        vb.customize ["modifyvm", :id, "--cpus", machine[:core]]
+        vb.name = machine[:hostname]
+        if (!machine[:hdd_name].nil?)
+          unless File.exist?(machine[:hdd_name])
+              vb.customize ["createhd", "--filename", machine[:hdd_name], "--size", machine[:hdd_size]]
           end
+          vb.customize ["storageattach", :id, "--storagectl", "SATA Controller", "--port", 1, "--device", 0, "--type", "hdd", "--medium", machine[:hdd_name]]
         end
-        #node.vm.provision "shell" do |s|
-        #  ssh_pub_key = File.expand_path("~#{ENV['USER']}/.ssh/id_rsa.pub")
-        #  s.inline = <<-SHELL
-        #    echo #{ssh_pub_key} >> /home/vagrant/.ssh/authorized_keys
-        #    SHELL
-        #end
-
-        node.vm.provision "ansible" do |setup|
-          setup.inventory_path = "../ansible/hosts"
-          setup.playbook = "../ansible/roles/setup.yaml"
-          setup.limit = "all"
-          setup.become = true
-          setup.extra_vars = { ansible_user: 'vagrant' }
-        end
-        if i == 6
-          node.vm.provision "ansible" do |swarm|
-            swarm.inventory_path = "../ansible/hosts"
-            swarm.playbook = "../ansible/roles/swarm.yaml"
-            swarm.limit = "all"
-            swarm.become = true
-            swarm.extra_vars = {
-              swarm_iface: "eth1"
-            }
-            swarm.groups = {
-              "manager" => [HOST_PREFIX + "[1:3]" + DOMAIN],
-              "worker"  => [HOST_PREFIX + "[4:6]" + DOMAIN],
-            }
-            swarm.raw_arguments = [
-              "-M ../ansible/library"
-            ]
-          end
+      end
+      node.vm.provision "ansible" do |setup|
+        setup.inventory_path = "../ansible/hosts"
+        setup.playbook = "../ansible/roles/setup.yaml"
+        setup.limit = "all"
+        setup.become = true
+        setup.extra_vars = { ansible_user: 'vagrant' }
+      end
+      if (machine[:hostname]) == HOST_PREFIX + "6" + DOMAIN
+        node.vm.provision "ansible" do |swarm|
+          swarm.inventory_path = "../ansible/hosts"
+          swarm.playbook = "../ansible/roles/swarm.yaml"
+          swarm.limit = "all"
+          swarm.become = true
+          swarm.extra_vars = {
+            swarm_iface: "eth1"
+          }
+          swarm.groups = {
+            "manager" => [HOST_PREFIX + "[1:3]" + DOMAIN],
+            "worker"  => [HOST_PREFIX + "[4:6]" + DOMAIN],
+          }
+          swarm.raw_arguments = [
+            "-M ../ansible/library"
+          ]
         end
       end
     end
