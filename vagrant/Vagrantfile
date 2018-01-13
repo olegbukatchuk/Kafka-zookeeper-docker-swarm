@@ -88,8 +88,8 @@ Vagrant.configure(2) do |config|
       #node.vm.provision "shell" do |s|
       #  ssh_pub_key = File.expand_path("~#{ENV['USER']}/.ssh/id_rsa.pub")
       #  s.inline = <<-SHELL
-          echo #{ssh_pub_key} >> /home/vagrant/.ssh/authorized_keys
-          SHELL
+      #    echo #{ssh_pub_key} >> /home/vagrant/.ssh/authorized_keys
+      #    SHELL
       #end
       (1..6).each do |i|
         node.vm.provision "ansible" do |setup|
