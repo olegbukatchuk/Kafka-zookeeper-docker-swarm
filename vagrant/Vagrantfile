@@ -10,9 +10,7 @@ servers = [
     :ssh_host => "20011",
     :ssh_vm => "22",
     :ram => 4096,
-    :core => 1,
-    :hdd_name => HOST_PREFIX + "1_hdd.vdi",
-    :hdd_size => "10240"
+    :core => 1
   },
   {
     :hostname => HOST_PREFIX + "2" + DOMAIN,
@@ -20,9 +18,7 @@ servers = [
     :ssh_host => "20012",
     :ssh_vm => "22",
     :ram => 4096,
-    :core => 1,
-    :hdd_name => HOST_PREFIX + "2_hdd.vdi",
-    :hdd_size => "10240"
+    :core => 1
   },
   {
     :hostname => HOST_PREFIX + "3" + DOMAIN,
@@ -30,9 +26,7 @@ servers = [
     :ssh_host => "20013",
     :ssh_vm => "22",
     :ram => 4096,
-    :core => 1,
-    :hdd_name => HOST_PREFIX + "3_hdd.vdi",
-    :hdd_size => "10240"
+    :core => 1
   },
   {
     :hostname => HOST_PREFIX + "4" + DOMAIN,
@@ -40,9 +34,7 @@ servers = [
     :ssh_host => "20014",
     :ssh_vm => "22",
     :ram => 4096,
-    :core => 1,
-    :hdd_name => HOST_PREFIX + "4_hdd.vdi",
-    :hdd_size => "10240"
+    :core => 1
   },
   {
     :hostname => HOST_PREFIX + "5" + DOMAIN,
@@ -50,9 +42,7 @@ servers = [
     :ssh_host => "20015",
     :ssh_vm => "22",
     :ram => 4096,
-    :core => 1,
-    :hdd_name => HOST_PREFIX + "5_hdd.vdi",
-    :hdd_size => "10240"
+    :core => 1
   },
   {
     :hostname => HOST_PREFIX + "6" + DOMAIN,
@@ -60,9 +50,7 @@ servers = [
     :ssh_host => "20016",
     :ssh_vm => "22",
     :ram => 4096,
-    :core => 1,
-    :hdd_name => HOST_PREFIX + "6_hdd.vdi",
-    :hdd_size => "10240"
+    :core => 1
   }
 ]
 
@@ -78,12 +66,6 @@ Vagrant.configure(2) do |config|
         vb.customize ["modifyvm", :id, "--memory", machine[:ram]]
         vb.customize ["modifyvm", :id, "--cpus", machine[:core]]
         vb.name = machine[:hostname]
-        if (!machine[:hdd_name].nil?)
-          unless File.exist?(machine[:hdd_name])
-              vb.customize ["createhd", "--filename", machine[:hdd_name], "--size", machine[:hdd_size]]
-          end
-          vb.customize ["storageattach", :id, "--storagectl", "SATA Controller", "--port", 1, "--device", 0, "--type", "hdd", "--medium", machine[:hdd_name]]
-        end
       end
       node.vm.provision "ansible" do |setup|
         setup.inventory_path = "../ansible/hosts"
