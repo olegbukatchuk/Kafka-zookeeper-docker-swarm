@@ -91,17 +91,18 @@ Vagrant.configure(2) do |config|
           echo #{ssh_pub_key} >> /home/vagrant/.ssh/authorized_keys
           SHELL
       end
-      node.vm.provision "ansible" do |setup|
-        setup.inventory_path = "../ansible/hosts"
-        setup.playbook = "../ansible/roles/setup.yaml"
-        setup.limit = "all"
-        setup.become = true
-        setup.extra_vars = { ansible_user: 'vagrant' }
-      end
+
       (1..6).each do |i|
-        if [1,2,3].include?(i)
+        if [1,2,3,4,5,6].include?(i)
           config.vm.define HOST_PREFIX + "#{i}" + DOMAIN do |node|
             node.vm.hostname = HOST_PREFIX + "#{i}" + DOMAIN
+            node.vm.provision "ansible" do |setup|
+              setup.inventory_path = "../ansible/hosts"
+              setup.playbook = "../ansible/roles/setup.yaml"
+              setup.limit = "all"
+              setup.become = true
+              setup.extra_vars = { ansible_user: 'vagrant' }
+            end
           end
         else
           config.vm.define HOST_PREFIX + "#{i}" + DOMAIN do |node|
