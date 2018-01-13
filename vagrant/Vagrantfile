@@ -95,6 +95,7 @@ Vagrant.configure(2) do |config|
       node.vm.provision "ansible" do |setup|
         setup.inventory_path = "../ansible/hosts"
         setup.playbook = "../ansible/roles/setup.yaml"
+        setup.limit = "all"
         setup.become = true
         setup.extra_vars = { ansible_user: 'vagrant' }
       end
@@ -108,8 +109,10 @@ Vagrant.configure(2) do |config|
             node.vm.hostname = HOST_PREFIX + "#{i}" + DOMAIN
             if i == 6
               node.vm.provision "ansible" do |swarm|
+                swarm.inventory_path = "../ansible/hosts"
                 swarm.playbook = "../ansible/roles/swarm.yaml"
                 swarm.limit = "all"
+                swarm.become = true
                 swarm.extra_vars = {
                   swarm_iface: "eth1"
                 }
