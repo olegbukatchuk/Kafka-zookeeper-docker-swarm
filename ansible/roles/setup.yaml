@@ -101,7 +101,7 @@
     - name: Setting up docker
       copy: content='DOCKER_OPTS=""'
         dest=/etc/default/docker
-      notify: Перезапуск docker
+      notify: Restart docker
 
     - name: Add the current user to group docker
       user: name=vagrant append=yes groups=docker

@@ -25,4 +25,4 @@
      tasks:
      - command: "docker swarm join \
                --advertise-addr eth0 \
-               --token {{hostvars[groups['swarm-master'][0]].swarmtoken}} {{hostvars[groups['swarm-master'][0]].inventory_hostname}}:2377"
+               --token {{hostvars[groups['manager'][0]].swarmtoken}} {{hostvars[groups['manager'][0]].inventory_hostname}}:2377"
