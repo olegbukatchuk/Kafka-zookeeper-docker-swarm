@@ -1,18 +1,28 @@
-- name: Initialize Swarm Master
- hosts: swarm-master
- gather_facts: yes
- sudo: true
- tasks:
- - command: "docker swarm init --advertise-addr eth0"
- - command: "docker swarm join-token -q worker"
- register: swarm_token
- - set_fact: swarmtoken="{{swarm_token.stdout}}"
+- hosts: nodes
+  become: yes
+  become_user: root
+  remote_user: vagrant
 
-- name: Join Swarm Nodes
- hosts: swarm-nodes
- gather_facts: yes
- sudo: true
- tasks:
- - command: "docker swarm join \
-           --advertise-addr eth0 \
-           --token {{hostvars[groups['swarm-master'][0]].swarmtoken}} {{hostvars[groups['swarm-master'][0]].inventory_hostname}}:2377"
+  tasks:
+    - name: Initialize Swarm Master
+     hosts: manager
+     gather_facts: yes
+     become_user: root
+     remote_user: vagrant
+     sudo: true
+     tasks:
+     - command: "docker swarm init --advertise-addr eth0"
+     - command: "docker swarm join-token -q worker"
+     register: swarm_token
+     - set_fact: swarmtoken="{{swarm_token.stdout}}"
+
+    - name: Join Swarm Nodes
+     hosts: worker
+     gather_facts: yes
+     become_user: root
+     remote_user: vagrant
+     sudo: true
+     tasks:
+     - command: "docker swarm join \
+               --advertise-addr eth0 \
+               --token {{hostvars[groups['swarm-master'][0]].swarmtoken}} {{hostvars[groups['swarm-master'][0]].inventory_hostname}}:2377"

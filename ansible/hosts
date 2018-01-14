@@ -12,6 +12,9 @@ server2.local
 server3.local
 
 [worker]
+server1.local
+server2.local
+server3.local
 server4.local
 server5.local
 server6.local
