@@ -16,7 +16,7 @@
       - command: "docker swarm join-token -q worker"
      register: swarm_token
       - set_fact:
-        swarmtoken="{{swarm_token.stdout}}"
+          swarmtoken: "{{swarm_token.stdout}}"
 
    - name: Join Swarm Nodes
      hosts: worker
