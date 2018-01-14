@@ -4,32 +4,32 @@
   remote_user: vagrant
 
   tasks:
-    - name: Создание директории для ssh-ключей у пользователя root
+    - name: Create directory for ssh-keys
       file: state=directory mode=0700 dest=/root/.ssh/
 
-    - name: Копирование rsa-ключа в окружение пользователя root
+    - name: Adding rsa-key in /root/.ssh/authorized_keys
       copy: src=~/.ssh/id_rsa.pub dest=/root/.ssh/authorized_keys owner=root mode=0600
       register: rsa
       ignore_errors: yes
 
-    - name: Копирование dsa-ключа в окружение пользователя root
+    - name: Adding dsa-key in /root/.ssh/authorized_keys
       copy: src=~/.ssh/id_dsa.pub dest=/root/.ssh/authorized_keys owner=root mode=0600
       when: rsa|failed
 
-    - name: Проверка работы DNS
+    - name: Checking DNS
       command: host -t A google.com
       register: ns
       ignore_errors: yes
 
-    - name: Копирование новой конфигурации DNS, если проверка потерпела неудачу
+    - name: Copying new configuration for DNS, if you have validation failed
       lineinfile: regexp="^nameserver " line="nameserver 8.8.8.8" dest=/etc/resolv.conf
       when: ns|failed
 
-    - name: Проверка работы DNS, если применяли новые настройки
+    - name: Check DNS, if applied new settings
       command: host -t A google.com
       when: ns|failed
 
-    - name: Установка служебных утилит
+    - name: Installing tools
       apt: >
         package={{ item }}
         state=present
@@ -42,33 +42,33 @@
         - nano
         - curl
 
-    - name: Установка apt-transport-https
+    - name: Installing apt-transport-https
       apt: name=apt-transport-https state=latest
 
-    - name: Установка ca-certificates
+    - name: Installing ca-certificates
       apt: name=ca-certificates state=latest
 
-    - name: Проверка наличия пакета python-apt
+    - name: Checking package python-apt
       command: dpkg -s python-apt
       register: pythonapt
       when: "ansible_os_family == 'Debian'"
       ignore_errors: yes
 
-    - name: Установка python-apt, если его нет в системе
+    - name: Installing python-apt, if it is not in the system
       shell: apt-get update && apt-get -y install python-apt
       when: "ansible_os_family == 'Debian' and pythonapt.stderr"
 
-    - name: Установка pip
+    - name: Installing pip
       apt: name=python-pip state=latest
 
-    - name: Установка pip3
+    - name: Installing pip3
       apt: name=python3-pip state=latest
 
-    - name: Установка docker-py
+    - name: Installing docker-py
       command: pip install docker-py
       ignore_errors: yes
 
-    - name: Установка зависимостей
+    - name: Installing dependencies
       apt: >
         name={{ item }}
         state=latest
@@ -79,44 +79,44 @@
       tags:
         - packages
 
-    - name: Добавление ключей docker репозитория
+    - name: Adding keys docker repository
       apt_key: >
         id=58118E89F3A912897C070ADBF76221572C52609D
         keyserver=hkp://p80.pool.sks-keyservers.net:80
         state=present
 
-    - name: Добавление docker репозитория
+    - name: Adding docker repository
       apt_repository: >
         repo="deb https://apt.dockerproject.org/repo debian-jessie main"
         state=present
         update_cache=yes
 
-    - name: Установка docker
+    - name: Installing docker
       apt: >
         pkg={{item}}
         state=present
       with_items:
         - docker-engine
 
-    - name: Настройка docker
+    - name: Setting up docker
       copy: content='DOCKER_OPTS=""'
         dest=/etc/default/docker
       notify: Перезапуск docker
 
-    - name: Добавление текущего пользователя в группу docker
+    - name: Add the current user to group docker
       user: name=vagrant append=yes groups=docker
 
-    - name: Установка docker-compose
+    - name: Installing docker-compose
       get_url:
         url: https://github.com/docker/compose/releases/download/1.17.0/docker-compose-Linux-x86_64
         dest: /usr/local/bin/docker-compose
         mode: 0755
 
-    - name: Даём права на исполнение docker-compose
+    - name: Give execute permissions docker-compose
       file: dest=/usr/local/bin/docker-compose mode=a+x
 
   handlers:
-      - name: Перезапуск docker
+      - name: Restart docker
         service:
           name: docker
           state: restarted

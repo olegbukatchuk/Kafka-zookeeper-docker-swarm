@@ -82,8 +82,8 @@ Vagrant.configure(2) do |config|
             swarm_iface: "eth1"
           }
           swarm.groups = {
-            "manager" => [HOST_PREFIX + "[1:3]" + DOMAIN],
-            "worker"  => [HOST_PREFIX + "[4:6]" + DOMAIN],
+            "manager" => [HOST_PREFIX + "1" + DOMAIN],
+            "worker"  => [HOST_PREFIX + "[2:6]" + DOMAIN],
           }
           swarm.raw_arguments = [
             "-M ../ansible/library"
