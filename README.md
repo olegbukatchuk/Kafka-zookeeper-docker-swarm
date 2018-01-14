@@ -1,1 +1,1 @@
-# Деплой кластера Kafka / Zookeeper в Docker Swarm с помощью Ansible / Vagrant 
+# kafka-zookeeper-docker-swarm-ansible-vagrant 
