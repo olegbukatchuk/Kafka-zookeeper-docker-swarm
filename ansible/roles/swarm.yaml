@@ -12,10 +12,10 @@
      remote_user: vagrant
      sudo: true
      tasks:
-     - command: "docker swarm init --advertise-addr eth0"
-     - command: "docker swarm join-token -q worker"
+      - command: "docker swarm init --advertise-addr eth0"
+      - command: "docker swarm join-token -q worker"
      register: swarm_token
-     - set_fact: swarmtoken="{{swarm_token.stdout}}"
+      - set_fact: swarmtoken="{{swarm_token.stdout}}"
 
    - name: Join Swarm Nodes
      hosts: worker
@@ -24,6 +24,6 @@
      remote_user: vagrant
      sudo: true
      tasks:
-     - command: "docker swarm join \
+       - command: "docker swarm join \
                --advertise-addr eth0 \
                --token {{hostvars[groups['manager'][0]].swarmtoken}} {{hostvars[groups['manager'][0]].inventory_hostname}}:2377"
