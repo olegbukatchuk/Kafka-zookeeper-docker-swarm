@@ -4,7 +4,8 @@
   remote_user: vagrant
 
   tasks:
-    - name: Initialize Swarm Master
+    
+   - name: Initialize Swarm Master
      hosts: manager
      gather_facts: yes
      become_user: root

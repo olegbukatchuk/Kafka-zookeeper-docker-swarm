@@ -1,7 +1,10 @@
 # -*- mode: ruby -*-
-HOST_PREFIX = "server"
+
+ISO = "debian/stretch64"
 NET = "192.168.10."
 DOMAIN = ".local"
+HOST_PREFIX = "server"
+INVENTORY_PATH = "../ansible/hosts"
 
 servers = [
   {
@@ -50,7 +53,7 @@ Vagrant.configure(2) do |config|
   config.vm.synced_folder ".", "/vagrant", disabled: true
   servers.each do |machine|
     config.vm.define machine[:hostname] do |node|
-      node.vm.box = "debian/stretch64"
+      node.vm.box = ISO
       node.vm.hostname = machine[:hostname]
       node.vm.network "private_network", ip: machine[:ip]
       node.vm.network :forwarded_port, guest: machine[:ssh_vm], host: machine[:ssh_host]
@@ -60,14 +63,14 @@ Vagrant.configure(2) do |config|
         vb.name = machine[:hostname]
       end
       node.vm.provision "ansible" do |setup|
-        setup.inventory_path = "../ansible/hosts"
+        setup.inventory_path = INVENTORY_PATH
         setup.playbook = "../ansible/roles/setup.yaml"
         setup.become = true
         setup.extra_vars = { ansible_user: 'vagrant' }
       end
       if (machine[:hostname]) == HOST_PREFIX + "5" + DOMAIN
         node.vm.provision "ansible" do |swarm|
-          swarm.inventory_path = "../ansible/hosts"
+          swarm.inventory_path = INVENTORY_PATH
           swarm.playbook = "../ansible/roles/swarm.yaml"
           swarm.become = true
           swarm.extra_vars = {
