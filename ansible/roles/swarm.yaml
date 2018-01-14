@@ -10,7 +10,6 @@
      gather_facts: yes
      become_user: root
      remote_user: vagrant
-     sudo: true
      tasks:
       - command: "docker swarm init --advertise-addr eth0"
       - command: "docker swarm join-token -q worker"
@@ -22,7 +21,6 @@
      gather_facts: yes
      become_user: root
      remote_user: vagrant
-     sudo: true
      tasks:
        - command: "docker swarm join \
                --advertise-addr eth0 \
