@@ -73,7 +73,7 @@ Vagrant.configure(2) do |config|
           swarm.inventory_path = INVENTORY_PATH
           swarm.playbook = "../ansible/roles/swarm.yaml"
           swarm.become = true
-          swarm.extra_vars = { swarm_iface: "eth1" }
+          swarm.extra_vars = { swarm_iface: "eth0" }
           swarm.groups = {
             "manager" => [HOST_PREFIX + "1" + DOMAIN],
             "worker"  => [HOST_PREFIX + "[2:5]" + DOMAIN],

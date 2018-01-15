@@ -5,7 +5,7 @@
 
   tasks:
     - name: Initialize Swarm Master
-      command: "docker swarm init --advertise-addr eth1 && docker swarm join-token -q worker"
+      command: "docker swarm init --advertise-addr eth0 && docker swarm join-token -q worker"
       register: swarm_token
 
       #set_fact: swarmtoken={{swarm_token.stdout}}
@@ -17,4 +17,4 @@
 
   tasks:
     - name: Join Swarm Nodes
-      command: "docker swarm join --advertise-addr eth1 --token {{hostvars[groups['manager'][0]].swarmtoken}} {{hostvars[groups['manager'][0]].inventory_hostname}}:2377"
+      command: "docker swarm join --advertise-addr eth0 --token {{hostvars[groups['manager'][0]].swarmtoken}} {{hostvars[groups['manager'][0]].inventory_hostname}}:2377"
