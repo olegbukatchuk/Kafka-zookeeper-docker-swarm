@@ -6,7 +6,7 @@
   tasks:
     - name: Initialize Swarm Master
       command: "docker swarm init --advertise-addr eth0 && docker swarm join-token -q worker"
-      register: swarm_token
+      register: swarmtoken
 
       #set_fact: swarmtoken={{swarm_token.stdout}}
 
